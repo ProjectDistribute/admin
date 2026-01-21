@@ -141,7 +141,7 @@ const Sidebar = ({ activeTab, onTabChange }) => {
 
 const StatCard = ({ title, value, sub, subColor = "text-primary", live = false }) => (
   <div className="panel p-4 group cursor-pointer hover:border-primary/30 transition-all duration-300 relative">
-    <GlowBorders />
+    {/* <GlowBorders /> */}
     <div className="corner-bracket corner-tl group-hover:w-4 group-hover:h-4 transition-all"></div>
     <div className="flex justify-between items-start mb-3">
       <span className="text-[10px] text-white/50 font-bold tracking-wider">{title}</span>
@@ -210,7 +210,7 @@ const DashboardView = () => {
       {/* Live Telemetry Chart */}
       <section className="panel p-6 relative">
         <CornerBrackets />
-        <GlowBorders v={true} />
+        {/* <GlowBorders v={true} /> */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-primary"></div>
@@ -272,7 +272,7 @@ const DashboardView = () => {
       {/* System Core Log */}
       <div className="panel p-5 min-h-[230px] flex flex-col relative">
         <CornerBrackets />
-        <GlowBorders v={true} />
+        {/* <GlowBorders v={true} /> */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
             <Activity className="w-3 h-3 text-primary" />
