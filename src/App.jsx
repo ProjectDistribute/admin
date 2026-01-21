@@ -1,393 +1,382 @@
-import React, { useState, useEffect, memo, useMemo, useRef } from 'react';
+import React, { useState } from 'react';
+import {
+  Terminal,
+  Cpu,
+  Activity,
+  Clock,
+  Database,
+  Music,
+  Mic,
+  PlayCircle,
+  Users,
+  Settings,
+  ShieldAlert,
+  Power,
+  RotateCcw,
+  Trash2,
+  Zap,
+  List
+} from 'lucide-react';
 import './index.css';
-import { AudioWaveform, Library, Mic, List, ScanFace, Server, Settings2 } from 'lucide-react';
 
-const CornerBrackets = memo(({ color }) => (
+const CornerBrackets = () => (
   <>
-    <div className="corner-brackets top" style={color ? { '--corner-color': color } : {}}></div>
-    <div className="corner-brackets bottom" style={color ? { '--corner-color': color } : {}}></div>
+    <div className="corner-bracket corner-tl"></div>
+    <div className="corner-bracket corner-tr"></div>
+    <div className="corner-bracket corner-bl"></div>
+    <div className="corner-bracket corner-br"></div>
   </>
-));
+);
 
-const Header = memo(() => (
-  <header className="flex-between" style={{ height: '60px', borderBottom: '1px solid var(--border-main)', padding: '0 24px', background: 'rgba(5,5,5,0.8)' }}>
-    <div className="flex-center" style={{ gap: '16px' }}>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-      <span className="uppercase tracking-widest text-dim">Distribute / <span style={{ color: 'var(--text-main)' }}>Dashboard</span></span>
+const GlowBorders = ({ h = true, v = false }) => (
+  <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    {h && <div className="glow-border-h top-0 opacity-40"></div>}
+    {h && <div className="glow-border-h bottom-0 opacity-40"></div>}
+    {v && <div className="glow-border-v left-0 opacity-40"></div>}
+    {v && <div className="glow-border-v right-0 opacity-40"></div>}
+  </div>
+);
+
+const Header = () => (
+  <header className="bg-panel-dark/80 backdrop-blur-xl border-b border-white/5 p-3 flex justify-between items-center z-40 sticky top-0 relative">
+    <div className="glow-border-h bottom-0 left-1/2 -translate-x-1/2 w-full opacity-20"></div>
+    <div className="flex items-center gap-2">
+      <img src="/logo.png" alt="Logo" className="w-10 h-10 p-2" />
+      <div className="flex flex-col">
+        <span className="text-[10px] leading-tight text-white/50">ADMIN</span>
+        <span className="text-primary font-bold">DISTRIBUTOR</span>
+      </div>
     </div>
-    <div className="flex-center" style={{ gap: '40px', fontSize: '12px' }}>
-      <div className="text-right">
-        <div className="text-dim uppercase">Memory Cache</div>
-        <div>87%</div>
+    <div className="flex items-center gap-6">
+      <div className="flex items-center gap-3 bg-white/5 p-2 px-3 border border-white/5 relative">
+        <div className="glow-border-v left-0 h-1/2 opacity-30"></div>
+        <Cpu className="w-3 h-3 text-primary/50" />
+        <div className="flex flex-col text-right">
+          <span className="text-[10px] leading-tight text-white/50">CPU USAGE</span>
+          <span className="text-white font-bold">2.1%</span>
+        </div>
       </div>
-      <div className="text-right">
-        <div className="text-dim uppercase">Session ID</div>
-        <div>7F3A-92KX-4410</div>
-      </div>
-      <div className="text-right">
-        <div className="text-dim uppercase">Uptime</div>
-        <div>00H:27M:14S</div>
-      </div>
-      <div className="text-right">
-        <div className="text-dim uppercase">Active Users</div>
-        <div>499 / 5,000</div>
+      <div className="flex items-center gap-3 bg-white/5 p-2 px-3 border border-white/5 relative">
+        <div className="glow-border-v left-0 h-1/2 opacity-30"></div>
+        <Clock className="w-3 h-3 text-primary/50" />
+        <div className="flex flex-col text-right">
+          <span className="text-[10px] leading-tight text-white/50">UPTIME</span>
+          <span className="text-white font-bold">00:27:14:02</span>
+        </div>
       </div>
     </div>
   </header>
-));
+);
 
-const Sidebar = memo(() => {
+const Sidebar = ({ activeTab, onTabChange }) => {
   const groups = [
+    {
+      title: 'System',
+      items: [
+        { icon: Activity, label: 'Dashboard' },
+        { icon: List, label: 'Logs' }
+      ]
+    },
     {
       title: 'Database',
       items: [
-        { icon: AudioWaveform, label: 'Songs' },
-        { icon: Library, label: 'Albums' },
+        { icon: Music, label: 'Songs' },
+        { icon: Database, label: 'Albums' },
         { icon: Mic, label: 'Artists' },
-        { icon: List, label: 'Playlists' }
+        { icon: PlayCircle, label: 'Playlists' }
       ]
     },
     {
       title: 'Management',
       items: [
-        { icon: ScanFace, label: 'Users' },
-        { icon: Server, label: 'Server Settings' },
-        { icon: Settings2, label: 'Admin Panel' }
+        { icon: Users, label: 'Users' },
+        { icon: ShieldAlert, label: 'Security' },
+        { icon: Settings, label: 'Settings' }
       ]
     }
   ];
 
   return (
-    <div style={{ width: '260px', borderRight: '1px solid var(--border-main)', display: 'flex', flexDirection: 'column' }}>
+    <aside className="w-64 border-r border-white/10 bg-bg-dark/50 flex flex-col p-4 gap-8 overflow-y-auto custom-scrollbar backdrop-blur-sm">
       {groups.map((group, i) => (
-        <div key={i} style={{ padding: '24px 0 12px' }}>
-          <div className="uppercase text-dim" style={{ padding: '0 24px 12px', fontSize: '10px', letterSpacing: '0.1em' }}>{group.title}</div>
+        <div key={i} className="flex flex-col gap-2">
+          <div className="text-[10px] text-white/30 tracking-[0.2em] pl-4 mb-2 flex items-center gap-2">
+            <span className="w-1 h-1 bg-primary/30 rounded-full"></span>
+            {group.title.toUpperCase()}
+          </div>
           {group.items.map((item, j) => (
-            <div key={j} className="flex-center" style={{
-              justifyContent: 'flex-start',
-              padding: '10px 24px',
-              gap: '12px',
-              color: 'var(--text-dim)',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              borderLeft: '2px solid transparent'
-            }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--text-main)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                e.currentTarget.style.borderLeftColor = 'var(--primary)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-dim)';
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.borderLeftColor = 'transparent';
-              }}
+            <button
+              key={j}
+              className={`sidebar-btn group relative overflow-hidden ${activeTab === item.label ? 'active border-l-2 border-primary bg-white/5' : 'border-l-2 border-transparent hover:border-white/20'}`}
+              onClick={() => onTabChange(item.label)}
             >
-              <item.icon size={18} strokeWidth={1.5} strokeLinecap="square" strokeLinejoin="miter" />
-              <span className="uppercase" style={{ fontSize: '12px' }}>{item.label}</span>
-            </div>
+              <div className={`absolute inset-0 fui-btn-bg opacity-0 transition-opacity duration-300 ${activeTab === item.label ? 'opacity-100' : 'group-hover:opacity-100'}`}></div>
+              <item.icon className={`w-4 h-4 z-10 relative transition-colors duration-300 ${activeTab === item.label ? 'text-primary text-glow' : 'text-slate-400 group-hover:text-white'}`} />
+              <span className={`font-medium z-10 relative text-xs tracking-wider transition-all duration-300 ${activeTab === item.label ? 'text-white translate-x-1' : 'text-slate-400 group-hover:text-white group-hover:translate-x-1'}`}>
+                {item.label}
+              </span>
+              {activeTab === item.label && (
+                <span className="absolute right-2 w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_5px_currentColor]"></span>
+              )}
+            </button>
           ))}
         </div>
       ))}
-    </div>
+      <div className="flex flex-col gap-2">
+        <div className="mt-auto p-4 bg-primary/5 border border-primary/20 space-y-2 relative overflow-hidden group hover:border-primary/40 transition-colors">
+          <div className="flex justify-between items-center text-[10px]">
+            <span className="text-primary/70 font-mono tracking-wider">STORAGE</span>
+            <span className="text-primary animate-pulse font-bold text-[8px]">78%</span>
+          </div>
+          <div className="h-1 bg-white/5 overflow-hidden">
+            <div className="h-full bg-primary w-4/5 shadow-[0_0_8px_rgba(0,255,194,0.5)] relative overflow-hidden">
+              <div className="absolute inset-0 bg-white/20 animate-slide-in"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
   );
-});
+};
 
-const HexGrid = memo(() => (
-  <div className="fui-hex-grid" style={{ maxWidth: '120px', gap: '4px' }}>
-    {Array.from({ length: 20 }).map((_, i) => (
-      <div key={i}
-        className={`fui-hex ${i % 3 === 0 ? 'active' : ''}`}
-        style={{
-          opacity: i % 3 === 0 ? 1 : 0.2,
-          transition: 'all 0.5s',
-          animation: i % 3 === 0 ? 'pulse-opacity 2s infinite' : 'none'
-        }}
-      ></div>
-    ))}
+const StatCard = ({ title, value, sub, subColor = "text-primary", live = false }) => (
+  <div className="panel p-4 group cursor-pointer hover:border-primary/30 transition-all duration-300 relative">
+    <GlowBorders />
+    <div className="corner-bracket corner-tl group-hover:w-4 group-hover:h-4 transition-all"></div>
+    <div className="flex justify-between items-start mb-3">
+      <span className="text-[10px] text-white/50 font-bold tracking-wider">{title}</span>
+      {live && (
+        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-sm">
+          <span className="w-1 h-1 rounded-full bg-primary animate-pulse"></span>
+          <span className="text-[8px] text-primary font-bold">LIVE</span>
+        </div>
+      )}
+    </div>
+    <div className="text-3xl font-bold text-white tracking-tighter mb-1">{value}</div>
+    <div className={`text-[10px] font-mono ${subColor} flex items-center gap-1`}>
+      {sub}
+    </div>
   </div>
-));
+);
 
-const StatModule = memo(({ label, value, sub, trend }) => (
-  <div style={{ position: 'relative', padding: '16px', background: 'rgba(5,5,5,0.4)', border: '1px solid var(--border-light)' }}>
-    <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: trend === 'up' ? 'var(--primary)' : 'var(--text-dim)', opacity: 0.5 }}></div>
-    <div className="flex-between" style={{ marginBottom: '8px' }}>
-      <span className="text-micro text-dim">{label}</span>
-      <span className="text-micro" style={{ color: 'var(--primary)' }}>● LIVE</span>
+const PlaceholderView = ({ title }) => (
+  <main className="flex-1 overflow-y-auto grid-bg p-6 flex flex-col items-center justify-center animate-slide-in">
+    <div className="panel p-12 text-center border-primary/20 bg-black/40 backdrop-blur-sm max-w-md w-full relative group">
+      <CornerBrackets />
+      <GlowBorders h={true} v={true} />
+
+      <div className="w-16 h-16 mx-auto mb-6 relative">
+        <div className="absolute inset-0 border-2 border-dashed border-primary/30 rounded-full animate-[spin_10s_linear_infinite]"></div>
+        <div className="absolute inset-2 border border-primary/50 rounded-full animate-[ping_3s_ease-in-out_infinite]"></div>
+        <ShieldAlert className="w-full h-full p-4 text-primary opacity-80" />
+      </div>
+
+      <h2 className="text-3xl font-bold text-primary mb-2 tracking-[0.2em] glitch-hover transition-all">{title.toUpperCase()}</h2>
+      <div className="text-xs text-secondary font-mono animate-pulse mb-8">
+        [ ENCRYPTED DATA STREAM ]
+      </div>
+
+      <div className="font-mono text-[10px] text-slate-500 space-y-2 border-t border-white/5 pt-4">
+        <div className="flex justify-between px-8">
+          <span>ACCESS_LEVEL:</span>
+          <span className="text-red-400">RESTRICTED</span>
+        </div>
+        <div className="flex justify-between px-8">
+          <span>KEY_ID:</span>
+          <span className="text-slate-600">NULL_PTR_EXC</span>
+        </div>
+        <div className="flex justify-between px-8">
+          <span>LATENCY:</span>
+          <span className="text-slate-600">-- ms</span>
+        </div>
+      </div>
+
+      <button className="mt-8 px-6 py-2 bg-primary/10 border border-primary/30 text-primary hover:bg-primary hover:text-black transition-all text-xs font-bold tracking-widest uppercase">
+        Request Access
+      </button>
     </div>
-    <div style={{ fontSize: '28px', color: 'var(--text-main)', fontFamily: 'var(--font-body)', fontWeight: '300', letterSpacing: '1px' }}>
-      {value}
-    </div>
-    <div className="flex-between" style={{ marginTop: '4px' }}>
-      <span className="text-micro" style={{ opacity: 0.7 }}>{sub}</span>
-      <span className="text-micro text-accent">{trend === 'up' ? '▲' : '▼'}</span>
-    </div>
-  </div>
-));
+  </main>
+);
 
-const AudioReactor = memo(() => {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let animationFrameId;
-
-    const bars = Array.from({ length: 16 }).map(() => ({
-      height: 20 + Math.random() * 80,
-      targetHeight: 20 + Math.random() * 80,
-      speed: 0.1 + Math.random() * 0.2
-    }));
-
-    const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const gap = 4;
-      const barWidth = (canvas.width - (bars.length - 1) * gap) / bars.length;
-
-      bars.forEach((bar, i) => {
-        // Smoothly animate towards target height
-        bar.height += (bar.targetHeight - bar.height) * bar.speed;
-        if (Math.abs(bar.height - bar.targetHeight) < 1) {
-          bar.targetHeight = 20 + Math.random() * 80;
-        }
-
-        const h = (bar.height / 100) * canvas.height;
-        ctx.fillStyle = i % 2 === 0 ? '#37F1B2' : '#888888';
-        ctx.globalAlpha = 0.5;
-        ctx.fillRect(i * (barWidth + gap), canvas.height - h, barWidth, h);
-      });
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-    return () => cancelAnimationFrame(animationFrameId);
-  }, []);
-
+const DashboardView = () => {
   return (
-    <div style={{ willChange: 'transform', transform: 'translateZ(0)', position: 'relative', height: '140px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', background: 'radial-gradient(circle, rgba(55,241,178,0.05) 0%, transparent 70%)', border: '1px solid var(--border-light)' }}>
-      {/* Decorative Lines */}
-      <div style={{ position: 'absolute', top: 0, left: '50%', width: '1px', height: '10px', background: 'var(--border-light)' }}></div>
-      <div style={{ position: 'absolute', bottom: 0, left: '50%', width: '1px', height: '10px', background: 'var(--border-light)' }}></div>
-
-      {/* Reactor Rings */}
-      <div className="animate-spin-slow" style={{ position: 'absolute', width: '90px', height: '90px', border: '1px dashed var(--text-dim)', borderRadius: '50%', opacity: 0.3 }}></div>
-      <div className="animate-spin-reverse" style={{ position: 'absolute', width: '70px', height: '70px', borderTop: '2px solid var(--primary)', borderBottom: '2px solid var(--primary)', borderRadius: '50%' }}></div>
-      <div className="animate-spin-slow" style={{ position: 'absolute', width: '50px', height: '50px', borderLeft: '2px solid var(--white)', borderRight: '2px solid var(--white)', borderRadius: '50%', opacity: 0.5 }}></div>
-
-      {/* Center Core */}
-      <div className="animate-pulse" style={{ willChange: 'opacity', width: '30px', height: '30px', background: 'var(--primary)', borderRadius: '50%', opacity: 0.4, filter: 'blur(5px)' }}></div>
-
-      {/* Frequency Bars - Canvas Optimized */}
-      <div style={{ position: 'absolute', bottom: '15px', left: '20px', right: '20px', height: '20px', display: 'flex', alignItems: 'flex-end', opacity: 0.8 }}>
-        <canvas ref={canvasRef} width={300} height={20} style={{ width: '100%', height: '100%' }} />
+    <main className="flex-1 overflow-y-auto grid-bg p-6 flex flex-col gap-6 animate-slide-in">
+      {/* Top Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <StatCard title="LIBRARY SIZE" value="842 GB" sub="+1.2 GB / DAY ▲" live={true} />
+        <StatCard title="TOTAL CLIENTS" value="12" sub="3 monthly ▲" live={true} />
       </div>
 
-      {/* Header Label */}
-      <div style={{ position: 'absolute', top: '8px', left: '12px' }} className="text-micro text-dim">AUDIO_CORE.v2</div>
-      <div style={{ position: 'absolute', top: '8px', right: '12px' }} className="text-micro text-accent animate-blink">ONLINE</div>
-    </div>
-  );
-});
-
-const MainPanel = memo(() => {
-  // Removed unneeded 100ms state loop that was forcing full dashboard re-renders
-  return (
-    <div style={{ flex: 1, padding: '24px', display: 'grid', gridTemplateColumns: 'minmax(320px, 360px) 1fr', gap: '24px', overflow: 'hidden' }}>
-
-      {/* LEFT: COMMAND & CONTROL */}
-      <div className="fui-box-angled" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-
-        <CornerBrackets color="var(--primary)" />
-
-        {/* Header */}
-        <div className="flex-between" style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '16px', marginBottom: '20px' }}>
-          <div className="flex-center" style={{ gap: '10px' }}>
-            <div className="animate-blink" style={{ width: '8px', height: '8px', background: 'var(--primary)', borderRadius: '50%' }}></div>
-            <span className="text-micro tracking-widest text-accent">SYSTEM OPERATIONS</span>
+      {/* Live Telemetry Chart */}
+      <section className="panel p-6 relative">
+        <CornerBrackets />
+        <GlowBorders v={true} />
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-primary"></div>
+            <span className="text-[11px] text-primary font-bold tracking-[0.2em]">BANDWIDTH</span>
+            <span className="text-white/20">/</span>
+            <span className="text-[11px] text-white/40 font-mono">OUTBOUND</span>
           </div>
-          <span className="text-micro text-dim">V.2.0.4</span>
-        </div>
-
-        {/* Dynamic Hex Status */}
-        <div style={{ marginBottom: '24px', display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <HexGrid />
-          <div style={{ flex: 1 }}>
-            <div className="text-micro text-dim" style={{ marginBottom: '4px' }}>CORE TEMP</div>
-            <div className="fui-progress-bar">
-              <div className="fui-progress-fill" style={{ width: '64%' }}></div>
-            </div>
-            <div className="flex-between" style={{ marginTop: '4px' }}>
-              <span className="text-micro">NORMAL</span>
-              <span className="text-micro text-accent">342 K</span>
-            </div>
+          <div className="flex gap-6 text-[10px] font-mono">
+            <span className="flex items-center gap-2"><span className="w-2 h-2 bg-primary"></span> CPU</span>
+            <span className="flex items-center gap-2 text-white/30"><span className="w-2 h-2 bg-secondary"></span> MEM</span>
+            <span className="flex items-center gap-2 text-white/30"><span className="w-2 h-2 bg-indigo-500"></span> IO</span>
           </div>
         </div>
 
-        {/* Terminal Output - Shrunken */}
-        <div style={{ height: '120px', fontFamily: 'var(--font-code)', fontSize: '11px', color: 'var(--text-dim)', overflow: 'hidden', position: 'relative', marginBottom: '24px', border: '1px solid var(--border-light)', padding: '12px', background: 'rgba(0,0,0,0.3)' }}>
-          <div className="animate-scan" style={{ position: 'absolute', inset: 0, zIndex: 0 }}></div>
-          <div style={{ position: 'relative', zIndex: 1, lineHeight: '1.5' }}>
-            <div style={{ color: 'var(--text-main)' }}>$ check_integrity -v --force</div>
-            <div style={{ color: 'var(--primary)' }}>[SUCCESS] Verification complete</div>
-            <div style={{ opacity: 0.5 }}>- Mounting volume /dev/disk3s1... OK</div>
-            <div style={{ opacity: 0.5 }}>- Loading modules... [42/42]</div>
-            <br />
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <span className="text-accent">➜</span>
-              <span className="animate-blink">_</span>
-            </div>
-          </div>
-        </div>
-
-        {/* NEW WIDGET: Audio Reactor */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <AudioReactor />
-        </div>
-
-        {/* Controls */}
-        <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border-light)', paddingTop: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <button className="fui-btn text-micro">
-              <span style={{ marginRight: '8px' }}>⏻</span> REBOOT
-            </button>
-            <button className="fui-btn text-micro">
-              <span style={{ marginRight: '8px' }}>⚠</span> PURGE
-            </button>
-            <button className="fui-btn text-micro" style={{ gridColumn: 'span 2', borderColor: 'var(--primary)', background: 'rgba(55,241,178,0.05)' }}>
-              INITIALIZE PROTOCOL 09
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* RIGHT: VISUAL TELEMETRY */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
-        {/* Top Stats Row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-          <StatModule label="NET TRAFFIC" value="45.2 TB" sub="+2.4% / HR" trend="up" />
-          <StatModule label="ACTIVE NODES" value="2,490" sub="OPTIMAL" trend="up" />
-          <StatModule label="PACKET LOSS" value="0.002%" sub="BELOW THRESHOLD" trend="down" />
-        </div>
-
-        {/* Main Main Chart Area */}
-        <div className="fui-box-angled" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', padding: '0' }}>
-
-          {/* Chart Header */}
-          <div className="flex-between" style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-light)' }}>
-            <div className="flex-center" style={{ gap: '12px' }}>
-              <span className="text-micro text-accent">Live Telemetry</span>
-              <div style={{ width: '1px', height: '12px', background: 'var(--border-light)' }}></div>
-              <span className="text-micro text-dim">CHANNEL 01</span>
-            </div>
-            <div className="flex-center" style={{ gap: '16px' }}>
-              {['CPU', 'MEM', 'IO'].map(l => (
-                <div key={l} className="flex-center" style={{ gap: '6px' }}>
-                  <div style={{ width: '6px', height: '6px', background: l === 'MEM' ? 'var(--primary)' : '#555' }}></div>
-                  <span className="text-micro text-dim">{l}</span>
-                </div>
+        <div className="relative h-64 w-full bg-white/[0.02] border border-white/5">
+          <svg className="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#00FFC2" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#00FFC2" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <g className="opacity-10">
+              <line stroke="white" strokeWidth="0.5" x1="0" x2="400" y1="50" y2="50"></line>
+              <line stroke="white" strokeWidth="0.5" x1="0" x2="400" y1="100" y2="100"></line>
+              <line stroke="white" strokeWidth="0.5" x1="0" x2="400" y1="150" y2="150"></line>
+              {[50, 100, 150, 200, 250, 300, 350].map(x => (
+                <line key={x} stroke="white" strokeWidth="0.5" x1={x} x2={x} y1="0" y2="200"></line>
               ))}
-            </div>
+            </g>
+
+            <path
+              d="M0,150 Q50,140 100,120 T200,130 T300,105 T400,90 L400,200 L0,200 Z"
+              fill="url(#chartGradient)"
+            />
+            <path
+              d="M0,150 Q50,140 100,120 T200,130 T300,105 T400,90"
+              fill="none"
+              stroke="#00FFC2"
+              strokeWidth="2"
+              className="drop-shadow-[0_0_8px_rgba(0,255,194,0.5)]"
+            />
+          </svg>
+          <div className="absolute top-0 right-[25%] bottom-0 w-px bg-primary/20 flex flex-col items-center">
+            <div className="mt-4 bg-primary text-black text-[9px] px-2 py-0.5 font-bold font-mono whitespace-nowrap">539 MB/s</div>
+            <div className="flex-1 w-px border-l border-dashed border-primary/20"></div>
           </div>
+        </div>
 
-          {/* Chart Content */}
-          <div style={{ flex: 1, position: 'relative', padding: '0' }}>
-            {/* Grid Background */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: 'radial-gradient(circle, var(--text-dim) 1px, transparent 1px)',
-              backgroundSize: '40px 40px',
-              opacity: 0.1
-            }}></div>
+        <div className="flex justify-between text-[10px] text-white/30 font-mono mt-6 pt-4 border-t border-white/5">
+          <span>T-24H</span>
+          <span>T-18H</span>
+          <span>T-12H</span>
+          <span>T-06H</span>
+          <span>CURRENT</span>
+        </div>
+      </section>
 
-            <div className="animate-scan" style={{ position: 'absolute', inset: 0, opacity: 0.3 }}></div>
-
-            {/* The SVG Chart - Now Framed properly */}
-            <div style={{ position: 'absolute', inset: '16px 0px 40px 0px' }}>
-              <div style={{ position: 'absolute', inset: '0px 16px 0px 16px' }}>
-                <CornerBrackets color="var(--primary)" />
-              </div>
-              <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
-                {/* X/Y Axis Lines */}
-                {/* Random noise background line */}
-                <path d="M0,180 Q50,170 100,190 T200,180 T300,170 T400,190 T500,180"
-                  fill="none" stroke="rgba(255,255,255,0.1)" strokeDasharray="4 4" />
-
-                {/* Main Data Line */}
-                {/* Main Data Line - Glow Layer */}
-                <path d="M0,150 C50,140 80,100 120,110 C160,120 200,80 250,90 C300,100 350,60 400,70 C450,80 480,40 500,50"
-                  fill="none" stroke="var(--primary)" strokeWidth="6" strokeOpacity="0.2"
-                  vectorEffect="non-scaling-stroke" />
-
-                {/* Main Data Line - Core Layer */}
-                <path d="M0,150 C50,140 80,100 120,110 C160,120 200,80 250,90 C300,100 350,60 400,70 C450,80 480,40 500,50"
-                  fill="none" stroke="var(--primary)" strokeWidth="2"
-                  vectorEffect="non-scaling-stroke" />
-
-                {/* Fill Gradient */}
-                <path d="M0,150 C50,140 80,100 120,110 C160,120 200,80 250,90 C300,100 350,60 400,70 C450,80 480,40 500,50 V200 H0 Z"
-                  fill="url(#grid-gradient)" fillOpacity="0.2" />
-
-                <defs>
-                  <linearGradient id="grid-gradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.5" />
-                    <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-              </svg>
+      {/* System Core Log */}
+      <div className="panel p-5 min-h-[230px] flex flex-col relative">
+        <CornerBrackets />
+        <GlowBorders v={true} />
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <Activity className="w-3 h-3 text-primary" />
+            <span className="text-[11px] text-primary font-bold tracking-widest">SERVER_EVENTS.LOG</span>
+          </div>
+          <span className="text-[10px] font-mono text-white/30">DISTRIBUTE v0.1.1</span>
+        </div>
+        <div className="flex-1 space-y-3 text-[10px] font-mono leading-relaxed bg-black/40 p-4 border border-white/5 overflow-hidden">
+          <div className="flex justify-between items-center pb-2 border-b border-white/5">
+            <span className="text-white/40 flex items-center gap-2">
+              <span className="text-primary font-bold">$</span> VERIFY_INDEX --FAST
+            </span>
+            <span className="text-primary font-bold">[ OK ]</span>
+          </div>
+          <div className="space-y-1 text-white/60">
+            <p className="flex gap-4"><span className="w-12 text-white/30">16:42:01</span> &gt; DETECTED NEW FILES IN /INCOMING... <span className="text-primary font-bold">QUEUED</span></p>
+            <p className="flex gap-4"><span className="w-12 text-white/30">16:42:05</span> &gt; PROCESSING "Discovery.flac"... <span className="text-primary font-bold">ADDED</span></p>
+            <p className="flex gap-4"><span className="w-12 text-white/30">16:42:09</span> &gt; CLIENT REQ: SYNC_MANIFEST <span className="text-secondary font-bold">SENT</span> - IP: 192.168.1.42</p>
+          </div>
+          <div className="flex items-center gap-3 mt-4">
+            <span className="text-[8px] text-white/30 whitespace-nowrap">INDEXING PROGRESS</span>
+            <div className="flex-1 h-1.5 bg-white/5 relative overflow-hidden">
+              <div className="absolute top-0 left-0 h-full bg-primary w-3/4 shadow-[0_0_10px_rgba(0,255,194,0.3)]"></div>
             </div>
-
-            {/* Axis Labels (Fake) */}
-            <div style={{ position: 'absolute', bottom: '10px', left: '48px', right: '24px', display: 'flex', justifyContent: 'space-between', color: 'var(--text-dim)' }}>
-              {['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'].map(t => (
-                <span key={t} className="text-micro">{t}</span>
-              ))}
-            </div>
-
           </div>
         </div>
       </div>
-    </div>
+
+
+      {/* Action Buttons */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-12">
+        <button className="panel group p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-slate-400 hover:text-white">
+          <Power className="w-5 h-5 text-secondary" />
+          <span className="text-[10px] font-bold">SHUTDOWN</span>
+        </button>
+        <button className="panel group p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-slate-400 hover:text-white">
+          <RotateCcw className="w-5 h-5 text-primary" />
+          <span className="text-[10px] font-bold">REBOOT</span>
+        </button>
+        <button className="panel group p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-slate-400 hover:text-white">
+          <Trash2 className="w-5 h-5 text-white/40" />
+          <span className="text-[10px] font-bold">PURGE CACHE</span>
+        </button>
+        <button className="bg-primary text-black flex flex-col items-center justify-center gap-2 p-4 hover:opacity-90 transition-all cursor-pointer border-none font-bold">
+          <Zap className="w-5 h-5 fill-current" />
+          <span className="text-[10px] tracking-[0.2em]">USELESS BUTTON</span>
+        </button>
+      </div>
+    </main>
   );
-});
+};
 
 function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('Dashboard');
+
   return (
-    <div className="App">
-      <div className="fui-grid"></div>
+    <div className="h-screen bg-bg-dark flex flex-col text-slate-400">
+      <div className="scanline"></div>
       <Header />
-      <div style={{ display: 'flex', height: 'calc(100vh - 90px)' }}>
-        <Sidebar />
-        <MainPanel />
+      <div className="flex flex-1 overflow-hidden relative">
+        <div className={`
+          fixed inset-0 z-50 bg-bg-dark/80 backdrop-blur-sm md:relative md:bg-transparent md:backdrop-blur-none transition-opacity duration-300
+          ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto'}
+        `} onClick={() => setIsSidebarOpen(false)}>
+          <div className={`
+            absolute left-0 top-0 bottom-0 w-64 md:relative transition-transform duration-300
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          `} onClick={(e) => e.stopPropagation()}>
+            <Sidebar activeTab={activeTab} onTabChange={(tab) => {
+              setActiveTab(tab);
+              setIsSidebarOpen(false); // Close sidebar on mobile select
+            }} />
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="md:hidden p-4 bg-panel-dark border-b border-white/5 flex items-center gap-4">
+            <button onClick={() => setIsSidebarOpen(true)} className="p-2 border border-primary/20 bg-primary/5 text-primary">
+              <List className="w-5 h-5" />
+            </button>
+            <span className="text-primary font-bold text-xs tracking-widest">{activeTab.toUpperCase()}</span>
+          </div>
+          {activeTab === 'Dashboard' ? <DashboardView /> : <PlaceholderView title={activeTab} />}
+        </div>
       </div>
 
-      {/* Footer / Status Bar */}
-      <div style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: '0 24px',
-        height: '30px',
-        borderTop: '1px solid var(--border-main)',
-        background: 'var(--bg-main)',
-        display: 'flex',
-        alignItems: 'center',
-        fontSize: '10px',
-        color: 'var(--text-dim)',
-        justifyContent: 'space-between'
-      }}>
-        <div>&gt; DISTRIBUTE // AUTH: SOURCELOCATION</div>
-        <div>LATENCY: 0.028 MS</div>
-      </div>
+
+      {/* Footer */}
+      <footer className="px-6 py-2 flex justify-between items-center text-[10px] bg-black/80 border-t border-white/5 text-white/30 font-mono relative">
+        <div className="glow-border-h top-0 left-1/2 -translate-x-1/2 w-full opacity-20"></div>
+        <div className="flex gap-4">
+          <span className="text-primary/50">&gt; DISTRIBUTE_OS</span>
+          <span>sourcelocation</span>
+          <span>v0.1.1</span>
+        </div>
+        <div className="flex gap-4">
+          <span>LATENCY: 0.028 MS</span>
+          <span className="text-primary font-bold">ENC: AES-256</span>
+        </div>
+      </footer>
     </div>
   );
 }
 
 export default App;
+
