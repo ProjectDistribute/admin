@@ -12,3 +12,6 @@ This is a admin panel for a music streaming service. Gets combined with the dist
 
 Follows FUI, a fictional design system.
 
+## Development
+
+- `npm run dev` is currently running on port 5173.
