@@ -10,7 +10,7 @@ const DataTable = ({ columns, data, hasNext, page, limit, onPageChange, loading,
                     <thead className="sticky top-0 bg-black/80 backdrop-blur-md z-10 border-b border-primary/20 text-[10px] text-primary font-bold tracking-widest uppercase shadow-lg">
                         <tr>
                             {columns.map((col, i) => (
-                                <th key={i} className="p-4 whitespace-nowrap">{col.header || col.label}</th>
+                                <th key={i} className="pl-8 p-4 whitespace-nowrap">{col.header || col.label}</th>
                             ))}
                             {actions && <th className="p-4 text-right">ACTIONS</th>}
                         </tr>
@@ -38,7 +38,7 @@ const DataTable = ({ columns, data, hasNext, page, limit, onPageChange, loading,
                                         const value = accessor.split('.').reduce((obj, key) => obj?.[key], row);
 
                                         return (
-                                            <td key={j} className="p-4 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
+                                            <td key={j} className="pl-8 pt-2 pb-2 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
                                                 {col.render ? col.render(row) : value}
                                             </td>
                                         );

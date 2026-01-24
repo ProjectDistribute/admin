@@ -195,9 +195,9 @@ const SetupWizard = () => {
             case 4:
                 return (
                     <div className="text-center animate-slide-in py-10">
-                        <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6 animate-bounce" />
-                        <h1 className="text-2xl font-bold text-white tracking-widest mb-4">SYSTEM ONLINE</h1>
-                        <p className="text-white/40 font-mono">Redirecting to login interface...</p>
+                        <CheckCircle className="w-20 h-20 text-primary mx-auto mb-6 animate-bounce" />
+                        <h1 className="text-2xl font-bold text-white tracking-widest mb-4">SETUP COMPLETE</h1>
+                        <p className="text-white/40 font-mono">Redirecting to login...</p>
                     </div>
                 );
             default:

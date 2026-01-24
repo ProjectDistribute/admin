@@ -11,6 +11,7 @@ import Users from './pages/Users_impl';
 import Settings from './pages/Settings';
 import GenericDataView from './pages/GenericDataView';
 import EditItem from './pages/EditItem';
+import { CreateArtistButton, CreateSongButton, CreateAlbumButton } from './components/CreationDialogs';
 import { Music, Database, Mic, PlayCircle } from 'lucide-react';
 
 import SetupWizard from './pages/SetupWizard';
@@ -80,14 +81,32 @@ const MainLayout = () => {
               path="/songs"
               element={
                 <GenericDataView
+                  key="songs"
                   title="Songs"
                   endpoint="/songs"
                   columns={[
+                    {
+                      key: 'cover',
+                      label: '',
+                      render: (row) => (
+                        <div className="w-10 h-10 bg-white/5 rounded overflow-hidden">
+                          {row.album?.id && (
+                            <img
+                              src={`/api/images/covers/${row.album.id}/lq`}
+                              alt={row.album?.title || 'Album Cover'}
+                              className="w-full h-full object-cover"
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                          )}
+                        </div>
+                      )
+                    },
                     { key: 'title', label: 'Title' },
                     { key: 'album.title', label: 'Album' },
                     { key: 'created_at', label: 'Created' }
                   ]}
                   icon={Music}
+                  createAction={(refresh) => <CreateSongButton onSuccess={refresh} />}
                   actions={(row) => (
                     <Link to={`/edit/songs/${row.id}`} className="text-white/40 hover:text-primary transition-colors font-mono text-xs tracking-wider">
                       EDIT
@@ -100,13 +119,29 @@ const MainLayout = () => {
               path="/albums"
               element={
                 <GenericDataView
+                  key="albums"
                   title="Albums"
                   endpoint="/admin/albums"
                   columns={[
+                    {
+                      key: 'cover',
+                      label: '',
+                      render: (row) => (
+                        <div className="w-10 h-10 bg-white/5 rounded overflow-hidden">
+                          <img
+                            src={`/api/images/covers/${row.id}/lq`}
+                            alt={row.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        </div>
+                      )
+                    },
                     { key: 'title', label: 'Title' },
                     { key: 'created_at', label: 'Created' }
                   ]}
                   icon={Database}
+                  createAction={(refresh) => <CreateAlbumButton onSuccess={refresh} />}
                   actions={(row) => (
                     <Link to={`/edit/albums/${row.id}`} className="text-white/40 hover:text-primary transition-colors font-mono text-xs tracking-wider">
                       EDIT
@@ -119,6 +154,7 @@ const MainLayout = () => {
               path="/artists"
               element={
                 <GenericDataView
+                  key="artists"
                   title="Artists"
                   endpoint="/admin/artists"
                   columns={[
@@ -126,6 +162,7 @@ const MainLayout = () => {
                     { key: 'created_at', label: 'Created' }
                   ]}
                   icon={Mic}
+                  createAction={(refresh) => <CreateArtistButton onSuccess={refresh} />}
                   actions={(row) => (
                     <Link to={`/edit/artists/${row.id}`} className="text-white/40 hover:text-primary transition-colors font-mono text-xs tracking-wider">
                       EDIT
@@ -137,11 +174,14 @@ const MainLayout = () => {
             <Route
               path="/playlists"
               element={
+
                 <GenericDataView
+                  key="playlists"
                   title="Playlists"
                   endpoint="/admin/playlists"
                   columns={[
                     { key: 'name', label: 'Name' },
+                    { key: 'user.username', label: 'Owner' },
                     { key: 'created_at', label: 'Created' }
                   ]}
                   icon={PlayCircle}

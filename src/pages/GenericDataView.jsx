@@ -3,7 +3,7 @@ import DataTable from '../components/DataTable';
 import { Database, Music, Mic, PlayCircle } from 'lucide-react';
 import api from '../api';
 
-const GenericDataView = ({ title, icon: Icon, endpoint, columns, addLabel, actions }) => {
+const GenericDataView = ({ title, icon: Icon, endpoint, columns, addLabel, actions, createAction }) => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
@@ -45,12 +45,18 @@ const GenericDataView = ({ title, icon: Icon, endpoint, columns, addLabel, actio
                     <h2 className="text-2xl font-bold text-white tracking-[0.1em] flex items-center gap-3">
                         <Icon className="w-6 h-6 text-primary" /> {title}
                     </h2>
-                    <p className="text-[10px] text-white/40 font-mono mt-1">Browse and manage database entries.</p>
                 </div>
-                {addLabel && (
-                    <button className="px-4 py-2 bg-primary text-black font-bold text-xs tracking-widest flex items-center gap-2 hover:opacity-90">
-                        + {addLabel}
-                    </button>
+
+                {createAction && typeof createAction === 'function' ? (
+                    <div className="flex gap-2">
+                        {createAction(fetchData)}
+                    </div>
+                ) : (
+                    addLabel && (
+                        <button className="px-4 py-2 bg-primary text-black font-bold text-xs tracking-widest flex items-center gap-2 hover:opacity-90">
+                            + {addLabel}
+                        </button>
+                    )
                 )}
             </div>
 
@@ -64,7 +70,7 @@ const GenericDataView = ({ title, icon: Icon, endpoint, columns, addLabel, actio
                 onPageChange={setPage}
                 actions={actions}
             />
-        </main>
+        </main >
     );
 };
 
