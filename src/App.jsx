@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
+import api from './api';
 import { StatsProvider } from './StatsContext';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -11,6 +12,35 @@ import Settings from './pages/Settings';
 import GenericDataView from './pages/GenericDataView';
 import EditItem from './pages/EditItem';
 import { Music, Database, Mic, PlayCircle } from 'lucide-react';
+
+import SetupWizard from './pages/SetupWizard';
+
+const SetupGuard = ({ children }) => {
+  const [checking, setChecking] = React.useState(true);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const checkSetup = async () => {
+      try {
+        const res = await api.get('/setup/status');
+        if (!res.data.setup_complete) {
+          if (location.pathname !== '/setup') {
+            window.location.href = '/setup'; // Force redirect to avoid loop issues with router
+          }
+        }
+      } catch (e) {
+        console.error("Failed to check setup status", e);
+      } finally {
+        setChecking(false);
+      }
+    };
+    checkSetup();
+  }, []);
+
+  if (checking) return null; // Or a loader
+  return children;
+};
 
 const AuthGuard = ({ children }) => {
   const { user, loading } = useAuth();
@@ -137,19 +167,22 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/*"
-            element={
-              <AuthGuard>
-                <StatsProvider>
-                  <MainLayout />
-                </StatsProvider>
-              </AuthGuard>
-            }
-          />
-        </Routes>
+        <SetupGuard>
+          <Routes>
+            <Route path="/setup" element={<SetupWizard />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/*"
+              element={
+                <AuthGuard>
+                  <StatsProvider>
+                    <MainLayout />
+                  </StatsProvider>
+                </AuthGuard>
+              }
+            />
+          </Routes>
+        </SetupGuard>
       </Router>
     </AuthProvider>
   );

@@ -54,7 +54,7 @@ const UsersView = () => {
                     </h2>
                     <p className="text-[10px] text-white/40 font-mono mt-1">Manage robust access control.</p>
                 </div>
-                <button className="px-4 py-2 bg-primary text-black font-bold text-xs tracking-widest flex items-center gap-2 hover:opacity-90">
+                <button className="px-4 py-2 bg-primary text-black font-bold text-xs tracking-widest flex items-center gap-2 hover:opacity-90 cursor-pointer">
                     <UserPlus className="w-4 h-4" /> ADD USER
                 </button>
             </div>
@@ -70,7 +70,7 @@ const UsersView = () => {
                 actions={(row) => (
                     <button
                         onClick={() => handleDelete(row.ID)}
-                        className="p-2 hover:bg-red-500/20 hover:text-red-500 rounded transition-colors"
+                        className="p-2 hover:bg-red-500/20 hover:text-red-500 rounded transition-colors cursor-pointer"
                         title="Delete User"
                     >
                         <Trash2 className="w-4 h-4" />

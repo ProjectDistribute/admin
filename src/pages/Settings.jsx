@@ -1,16 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CornerBrackets, GlowBorders } from '../components/FUI';
-import { Shield, Key, Server, Save } from 'lucide-react';
+import { Shield, Key, Server, Save, LogOut, Trash2, Database } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import api from '../api';
+import Alert from '../components/Alert';
 
 const SettingsView = () => {
-    const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState('security');
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'security');
+
+    useEffect(() => {
+        if (location.state?.activeTab) {
+            setActiveTab(location.state.activeTab);
+        }
+    }, [location.state?.activeTab]);
+
+    // Security State
     const [password, setPassword] = useState('');
-    const [currentPassword, setCurrentPassword] = useState(''); // Not verified by API in this simplified endpoint, but UI has field
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState('');
+    const [msgType, setMsgType] = useState('primary');
+
+    // Maintenance State
+    const [cleanupLoading, setCleanupLoading] = useState(false);
+
+    // General State
+    const [generalSettings, setGeneralSettings] = useState({
+        server_url: '',
+        mail_categories: '',
+        request_mail_announcement: ''
+    });
+    const [generalLoading, setGeneralLoading] = useState(false);
+
+    useEffect(() => {
+        if (activeTab === 'general') {
+            loadSettings();
+        }
+    }, [activeTab]);
+
+    const loadSettings = async () => {
+        try {
+            const res = await api.get('/admin/settings');
+            setGeneralSettings(res.data);
+        } catch (e) {
+            console.error("Failed to load settings", e);
+        }
+    };
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();
@@ -19,12 +57,54 @@ const SettingsView = () => {
         try {
             await api.put(`/users/${user.id}/password`, { password });
             setMsg('SUCCESS: CREDENTIALS UPDATED');
+            setMsgType('primary');
             setPassword('');
-            setCurrentPassword('');
         } catch (e) {
             setMsg('ERROR: ' + (e.response?.data?.error || e.message));
+            setMsgType('error');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
+    const handleGeneralSave = async (e) => {
+        e.preventDefault();
+        setGeneralLoading(true);
+        try {
+            await api.put('/admin/settings', generalSettings);
+            setMsg('SUCCESS: SETTINGS SAVED');
+            setMsgType('primary');
+            setTimeout(() => setMsg(''), 3000);
+        } catch (e) {
+            setMsg('ERROR: ' + (e.response?.data?.error || e.message));
+            setMsgType('error');
+        } finally {
+            setGeneralLoading(false);
+        }
+    };
+
+    const handleCleanup = async () => {
+        setCleanupLoading(true);
+        setMsg('');
+        try {
+            const res = await api.delete('/admin/orphans');
+            const stats = Object.entries(res.data)
+                .filter(([_, count]) => count > 0)
+                .map(([key, count]) => `${key}: ${count}`)
+                .join(', ');
+
+            setMsg(stats ? `CLEANUP COMPLETE: ${stats}` : 'CLEANUP COMPLETE: NO ORPHANS FOUND');
+            setMsgType('primary');
+        } catch (e) {
+            setMsg('ERROR: ' + (e.response?.data?.error || e.message));
+            setMsgType('error');
+        } finally {
+            setCleanupLoading(false);
         }
     };
 
@@ -50,10 +130,18 @@ const SettingsView = () => {
                 >
                     GENERAL
                 </button>
+                <button
+                    onClick={() => setActiveTab('maintenance')}
+                    className={`pb-3 px-1 text-xs font-bold tracking-widest transition-colors ${activeTab === 'maintenance' ? 'text-primary border-b-2 border-primary' : 'text-slate-500 hover:text-white'}`}
+                >
+                    MAINTENANCE
+                </button>
             </div>
 
             <div className="panel p-8 relative max-w-2xl">
                 <CornerBrackets />
+
+                <Alert type={msgType} message={msg} />
 
                 {activeTab === 'security' && (
                     <div className="space-y-8 animate-slide-in">
@@ -79,16 +167,16 @@ const SettingsView = () => {
                                 />
                             </div>
 
-                            {msg && (
-                                <div className={`text-[10px] font-mono p-2 border ${msg.startsWith('ERROR') ? 'border-red-500/30 text-red-400 bg-red-500/10' : 'border-primary/30 text-primary bg-primary/10'}`}>
-                                    {msg}
-                                </div>
-                            )}
-
-                            <button disabled={loading} className="bg-primary/10 border border-primary/30 text-primary px-6 py-3 font-bold text-xs hover:bg-primary hover:text-black transition-colors flex items-center gap-2">
+                            <button disabled={loading} className="bg-primary/10 border border-primary/30 text-primary px-6 py-3 font-bold text-xs hover:bg-primary hover:text-black transition-colors flex items-center gap-2 cursor-pointer">
                                 <Save className="w-4 h-4" /> {loading ? 'UPDATING...' : 'UPDATE CREDENTIALS'}
                             </button>
                         </form>
+
+                        <div className="pt-8 border-t border-white/10">
+                            <button onClick={handleLogout} className="border border-red-500/30 text-red-400 px-6 py-3 font-bold text-xs hover:bg-red-500/10 transition-colors flex items-center gap-2 cursor-pointer">
+                                <LogOut className="w-4 h-4" /> LOG OUT SESSION
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -104,16 +192,35 @@ const SettingsView = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center p-4 border border-white/5">
-                                <div>
-                                    <h4 className="text-white text-xs font-bold">PUBLIC REGISTRATION</h4>
-                                    <p className="text-[10px] text-white/30">Allow new users to sign up.</p>
-                                </div>
-                                <div className="w-10 h-5 bg-primary/20 rounded-full relative cursor-pointer">
-                                    <div className="absolute right-1 top-1 w-3 h-3 bg-primary rounded-full shadow-[0_0_5px_currentColor]"></div>
-                                </div>
+                        <form onSubmit={handleGeneralSave} className="space-y-4">
+                            <div className="space-y-1">
+                                <label className="text-[10px] text-primary font-bold tracking-widest block">PUBLIC SERVER URL</label>
+                                <input
+                                    type="text"
+                                    value={generalSettings.server_url}
+                                    onChange={(e) => setGeneralSettings({ ...generalSettings, server_url: e.target.value })}
+                                    className="w-full bg-black/40 border border-white/10 p-3 text-white font-mono text-sm focus:border-primary focus:outline-none"
+                                />
                             </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] text-primary font-bold tracking-widest block">MAIL CATEGORIES</label>
+                                <input
+                                    type="text"
+                                    value={generalSettings.mail_categories}
+                                    onChange={(e) => setGeneralSettings({ ...generalSettings, mail_categories: e.target.value })}
+                                    className="w-full bg-black/40 border border-white/10 p-3 text-white font-mono text-sm focus:border-primary focus:outline-none"
+                                />
+                                <p className="text-[10px] text-white/30 font-mono">Comma separated.</p>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] text-primary font-bold tracking-widest block">ANNOUNCEMENT</label>
+                                <textarea
+                                    value={generalSettings.request_mail_announcement}
+                                    onChange={(e) => setGeneralSettings({ ...generalSettings, request_mail_announcement: e.target.value })}
+                                    className="w-full bg-black/40 border border-white/10 p-3 text-white font-mono text-sm focus:border-primary focus:outline-none h-20 resize-none"
+                                />
+                            </div>
+
                             <div className="flex justify-between items-center p-4 border border-white/5">
                                 <div>
                                     <h4 className="text-white text-xs font-bold">DEBUG LOGGING</h4>
@@ -123,6 +230,40 @@ const SettingsView = () => {
                                     <div className="absolute left-1 top-1 w-3 h-3 bg-white/40 rounded-full"></div>
                                 </div>
                             </div>
+
+                            <button disabled={generalLoading} className="bg-primary/10 border border-primary/30 text-primary px-6 py-3 font-bold text-xs hover:bg-primary hover:text-black transition-colors flex items-center gap-2 cursor-pointer">
+                                <Save className="w-4 h-4" /> {generalLoading ? 'SAVING...' : 'SAVE CONFIGURATION'}
+                            </button>
+                        </form>
+                    </div>
+                )}
+
+                {activeTab === 'maintenance' && (
+                    <div className="space-y-8 animate-slide-in">
+                        <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/10">
+                            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                                <Database className="w-6 h-6 text-red-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-white font-bold text-sm">SYSTEM MAINTENANCE</h3>
+                                <p className="text-[10px] text-white/40 font-mono">Manage database integrity.</p>
+                            </div>
+                        </div>
+
+                        <div className="p-4 border border-white/5 bg-black/40">
+                            <h4 className="text-white text-xs font-bold mb-2">ORPHAN CLEANUP</h4>
+                            <p className="text-[10px] text-white/40 font-mono mb-4">
+                                Remove songs, albums, and artists that are no longer referenced or consistent.
+                                This action is irreversible.
+                            </p>
+
+                            <button
+                                onClick={handleCleanup}
+                                disabled={cleanupLoading}
+                                className="bg-red-500/10 border border-red-500/30 text-red-500 px-6 py-3 font-bold text-xs hover:bg-red-500 hover:text-black transition-colors flex items-center gap-2 cursor-pointer"
+                            >
+                                <Trash2 className="w-4 h-4" /> {cleanupLoading ? 'CLEANING...' : 'CLEANUP'}
+                            </button>
                         </div>
                     </div>
                 )}

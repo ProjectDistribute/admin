@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 import { CornerBrackets } from '../components/FUI';
 import { Activity, Power, RotateCcw, Trash2, Zap } from 'lucide-react';
@@ -138,6 +139,7 @@ const BandwidthChart = ({ data }) => {
 };
 
 const Dashboard = () => {
+    const navigate = useNavigate();
     const { stats } = useStats();
     const [bandwidth, setBandwidth] = useState([]);
     const [logs, setLogs] = useState([]);
@@ -209,7 +211,7 @@ const Dashboard = () => {
                         <div className="w-2 h-2 bg-primary"></div>
                         <span className="text-[11px] text-primary font-bold tracking-[0.2em]">BANDWIDTH</span>
                         <span className="text-white/20">/</span>
-                        <span className="text-[11px] text-white/40 font-mono">OUTBOUND + INBOUND (24H)</span>
+                        <span className="text-[11px] text-white/40 font-mono">OUTBOUND + INBOUND</span>
                     </div>
                     <div className="text-[10px] font-mono text-white/50">
                         MEM: {stats?.memory} | GOROUTINES: {stats?.goroutines}
@@ -220,9 +222,28 @@ const Dashboard = () => {
                     <BandwidthChart data={bandwidth} />
                     {/* X Axis Time Labels */}
                     <div className="absolute bottom-1 left-16 right-6 flex justify-between text-[9px] text-white/20 font-mono pointer-events-none">
-                        <span>-24h</span>
-                        <span>-12h</span>
-                        <span>NOW</span>
+                        <span>{(() => {
+                            if (!bandwidth || bandwidth.length === 0) return '-24h';
+                            let t = bandwidth[0].timestamp;
+                            if (bandwidth.length === 1) {
+                                t = new Date(new Date(t).getTime() - 15 * 60 * 1000).toISOString();
+                            }
+                            return new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        })()}</span>
+                        <span>{(() => {
+                            if (!bandwidth || bandwidth.length === 0) return '-12h';
+                            let start = bandwidth[0].timestamp;
+                            if (bandwidth.length === 1) {
+                                start = new Date(new Date(start).getTime() - 15 * 60 * 1000).toISOString();
+                            }
+                            const end = bandwidth[bandwidth.length - 1].timestamp;
+                            const mid = new Date(start).getTime() + (new Date(end).getTime() - new Date(start).getTime()) / 2;
+                            return new Date(mid).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        })()}</span>
+                        <span>{(() => {
+                            if (!bandwidth || bandwidth.length === 0) return 'NOW';
+                            return new Date(bandwidth[bandwidth.length - 1].timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        })()}</span>
                     </div>
                 </div>
             </section>
@@ -254,17 +275,20 @@ const Dashboard = () => {
 
             {/* Action Buttons */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-12">
-                <button className="panel group p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-slate-400 hover:text-white">
+                <button className="panel group p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-slate-400 hover:text-white cursor-pointer">
                     <Power className="w-5 h-5 text-secondary" />
                     <span className="text-[10px] font-bold">SHUTDOWN</span>
                 </button>
-                <button className="panel group p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-slate-400 hover:text-white">
+                <button className="panel group p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-slate-400 hover:text-white cursor-pointer">
                     <RotateCcw className="w-5 h-5 text-primary" />
                     <span className="text-[10px] font-bold">REBOOT</span>
                 </button>
-                <button className="panel group p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-slate-400 hover:text-white">
+                <button
+                    onClick={() => navigate('/settings', { state: { activeTab: 'maintenance' } })}
+                    className="panel group p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-slate-400 hover:text-white cursor-pointer"
+                >
                     <Trash2 className="w-5 h-5 text-white/40" />
-                    <span className="text-[10px] font-bold">PURGE CACHE</span>
+                    <span className="text-[10px] font-bold">MAINTENANCE</span>
                 </button>
                 <button className="bg-primary text-black flex flex-col items-center justify-center gap-2 p-4 hover:opacity-90 transition-all cursor-pointer border-none font-bold">
                     <Zap className="w-5 h-5 fill-current" />
