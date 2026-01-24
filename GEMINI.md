@@ -2,16 +2,17 @@
 
 This is a admin panel for a music streaming service. Gets combined with the distributor backend at docker build stage. Served at the root (https://serverip/), while API is at https://serverip/api/
 
-## Tech stack
+**Usage** Admin panel allows managing users, songs, albums, artists, playlists, and more.
+
+**Features** Allows uploading song files.
+
+**Tech stack**
 
 - React
 - Tailwind CSS
 - Vite
 
-## Design
+**Design** Follows minimal FUI, a fictional design system.
 
-Follows FUI, a fictional design system.
-
-## Development
-
+**Development**
 - `npm run dev` is currently running on port 5173.

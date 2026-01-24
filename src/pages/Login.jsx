@@ -70,7 +70,7 @@ const Login = () => {
                         disabled={loading}
                         className="w-full bg-primary/10 border border-primary/30 text-primary py-3 hover:bg-primary hover:text-black transition-all font-bold tracking-widest text-xs relative group"
                     >
-                        {loading ? 'AUTHENTICATING...' : 'INITIATE_HANDSHAKE'}
+                        {loading ? 'AUTHENTICATING...' : 'LOG IN'}
                         <div className="absolute inset-0 border border-primary/20 scale-105 opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"></div>
                     </button>
                 </form>
